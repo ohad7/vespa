@@ -24,17 +24,21 @@ template <typename MMapConfig>
 void
 TuneFileRandRead::setFromMmapConfig(const MMapConfig & mmapFlags) {
     for (size_t i(0), m(mmapFlags.options.size()); i < m; i++) {
+#ifdef __linux__
         switch (mmapFlags.options[i]) {
             case MMapConfig::MLOCK:    _mmapFlags |= MAP_LOCKED; break;
             case MMapConfig::POPULATE: _mmapFlags |= MAP_POPULATE; break;
             case MMapConfig::HUGETLB:  _mmapFlags |= MAP_HUGETLB; break;
         }
+#endif
     }
+#ifdef __linux__
     switch (mmapFlags.advise) {
         case MMapConfig::NORMAL:     setAdvise(POSIX_FADV_NORMAL); break;
         case MMapConfig::RANDOM:     setAdvise(POSIX_FADV_RANDOM); break;
         case MMapConfig::SEQUENTIAL: setAdvise(POSIX_FADV_SEQUENTIAL); break;
     }
+#endif
 }
 
 }

@@ -10,6 +10,10 @@
 #include <vespa/vespalib/io/fileutil.h>
 #include <experimental/filesystem>
 #include <thread>
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#include <sys/vmmeter.h>
+#endif
 #include <vespa/log/log.h>
 LOG_SETUP(".proton.common.hw_info_sampler");
 
@@ -43,7 +47,25 @@ sampleMemorySizeBytes(const HwInfoSampler::Config &cfg)
     if (cfg.memorySizeBytes != 0) {
         return cfg.memorySizeBytes;
     }
+#ifdef __linux__
     return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGESIZE);
+#elif defined(__APPLE__)
+    struct vmtotal vm_total;
+    int mib[2];
+    size_t len;
+
+    mib[0] = CTL_VM;
+    mib[1] = VM_METER;
+    len = sizeof(vm_total);
+    if (sysctl(mib, 2, &vm_total, &len, NULL, 0) >= 0) {
+        size_t pageSize = getpagesize();
+        uint64_t numPages = vm_total.t_rm + vm_total.t_free;
+        return pageSize * numPages;
+    }
+    LOG_ABORT("should not be reached");
+#else
+#error "Cannot determine physical memory"
+#endif
 }
 
 uint32_t

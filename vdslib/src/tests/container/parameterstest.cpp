@@ -27,7 +27,7 @@ Parameters_Test::testParameters()
     par.set("fast", "overture");
     par.set("overture", "yahoo");
     par.set("number", 6);
-    par.set("long", 8589934590L);
+    par.set("int64_t", INT64_C(8589934590));
     par.set("double", 0.25);
     std::unique_ptr<document::ByteBuffer> buffer(par.serialize());
 
@@ -39,14 +39,14 @@ Parameters_Test::testParameters()
     CPPUNIT_ASSERT_EQUAL(vespalib::stringref("yahoo"), par2.get("overture"));
     std::string stringDefault = "wayne corp";
     int numberDefault = 123;
-    long longDefault = 456;
+    int64_t int64Default = 456;
     double doubleDefault = 0.5;
     CPPUNIT_ASSERT_EQUAL(6, par2.get("number", numberDefault));
-    CPPUNIT_ASSERT_EQUAL(8589934590L, par2.get("long", longDefault));
+    CPPUNIT_ASSERT_EQUAL(INT64_C(8589934590), par2.get("int64_t", int64Default));
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.25, par2.get("double", doubleDefault), 0.0001);
 
     CPPUNIT_ASSERT_EQUAL(stringDefault, par2.get("nonexistingstring", stringDefault));
     CPPUNIT_ASSERT_EQUAL(numberDefault, par2.get("nonexistingnumber", numberDefault));
-    CPPUNIT_ASSERT_EQUAL(longDefault,   par2.get("nonexistinglong", longDefault));
+    CPPUNIT_ASSERT_EQUAL(int64Default,   par2.get("nonexistinglong", int64Default));
     CPPUNIT_ASSERT_EQUAL(doubleDefault, par2.get("nonexistingdouble", doubleDefault));
 }

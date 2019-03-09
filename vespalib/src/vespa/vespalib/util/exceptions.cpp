@@ -4,6 +4,9 @@
 #include <vespa/vespalib/stllike/asciistream.h>
 #include <vespa/vespalib/util/stringfmt.h>
 #include <mutex>
+#ifndef __linux__
+#include <unistd.h>
+#endif
 
 #include <errno.h>
 
@@ -33,7 +36,11 @@ vespalib::string _G_what;
 void silent_terminate() {
     std::lock_guard<std::mutex> guard(_G_silence_mutex);
     LOG(fatal, "Will exit with code 66 due to: %s", _G_what.c_str());
+#ifdef __linux__
     std::quick_exit(66);
+#else
+    _exit(66);
+#endif
 }
 
 }

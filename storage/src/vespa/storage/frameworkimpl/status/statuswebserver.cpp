@@ -8,6 +8,9 @@
 #include <vespa/vespalib/component/vtag.h>
 #include <vespa/vespalib/net/crypto_engine.h>
 #include <functional>
+#ifndef __linux__
+#include <unistd.h>
+#endif
 
 #include <vespa/log/log.h>
 LOG_SETUP(".status");
@@ -59,7 +62,11 @@ void StatusWebServer::configure(std::unique_ptr<vespa::config::content::core::St
         } catch (const vespalib::PortListenException & e) {
             LOG(error, "Failed listening to network port(%d) with protocol(%s): '%s', giving up and restarting.",
                 e.get_port(), e.get_protocol().c_str(), e.what());
+#ifdef __linux__
             std::quick_exit(17);
+#else
+            _exit(17);
+#endif
         }
         // Now that we know config update went well, update internal state
         _port = server->getListenPort();

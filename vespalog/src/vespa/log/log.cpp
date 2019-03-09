@@ -266,7 +266,11 @@ void Logger::doLogCore(uint64_t timestamp, LogLevel level,
         // threads, only showing the least significant bits will hopefully
         // distinguish between all threads in your application. Alter later if
         // found to be too inaccurate.
+#ifdef __linux__
     int32_t tid = (fakePid ? -1 : pthread_self() % 0xffff);
+#else
+    int32_t tid = (fakePid ? -1 : (((uint64_t)pthread_self()) >> 3) % 0xffff);
+#endif
 
     if (_target->makeHumanReadable()) {
         time_t secs = static_cast<time_t>(timestamp / 1000000);
@@ -379,7 +383,7 @@ Logger::doEventProgress(const char *name, double value, double total)
 void
 Logger::doEventCount(const char *name, uint64_t value)
 {
-    doLog(event, "", 0, "count/1 name=\"%s\" value=%lu", name, value);
+    doLog(event, "", 0, "count/1 name=\"%s\" value=%" PRIu64, name, value);
 }
 
 void

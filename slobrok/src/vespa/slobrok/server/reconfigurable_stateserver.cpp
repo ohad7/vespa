@@ -4,6 +4,9 @@
 #include <vespa/vespalib/util/exceptions.h>
 #include <vespa/vespalib/net/state_server.h>
 #include <thread>
+#ifndef __linux__
+#include <unistd.h>
+#endif
 
 #include <vespa/log/log.h>
 #include <vespa/config/common/exceptions.h>
@@ -52,7 +55,11 @@ ReconfigurableStateServer::configure(std::unique_ptr<vespa::config::core::States
         } catch (vespalib::PortListenException & e) {
             LOG(error, "Failed listening to network port(%d) with protocol(%s): '%s', giving up and restarting.",
                 e.get_port(), e.get_protocol().c_str(), e.what());
+#ifdef __linux__
             std::quick_exit(17);
+#else
+            _exit(17);
+#endif
         }
     }
 

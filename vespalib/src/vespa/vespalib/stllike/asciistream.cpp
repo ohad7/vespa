@@ -151,7 +151,11 @@ void throwUnderflow(size_t pos) __attribute__((noinline));
 
 void throwInputError(int e, const char * t, const char * buf)
 {
-    if (e == 0) {
+    if (e == 0
+#ifndef __linux__
+        || e == EINVAL
+#endif
+        ) {
         throw IllegalArgumentException("Failed decoding a " + string(t) + " from '" + string(buf) + "'.", VESPA_STRLOC);
     } else if (errno == ERANGE) {
         throw IllegalArgumentException(string(t) + " value is outside of range '" + string(buf) + "'.", VESPA_STRLOC);

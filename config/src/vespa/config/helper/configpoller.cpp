@@ -2,6 +2,9 @@
 
 #include "configpoller.h"
 #include <vespa/config/common/exceptions.h>
+#ifndef __linux__
+#include <unistd.h>
+#endif
 
 #include <vespa/log/log.h>
 LOG_SETUP(".config.helper.configpoller");
@@ -27,7 +30,11 @@ ConfigPoller::run()
         }
     } catch (config::InvalidConfigException & e) {
         LOG(fatal, "Got exception, will just exit quickly : %s", e.what());
+#ifdef __linux__
         std::quick_exit(17);
+#else
+        _exit(17);
+#endif
     }
 }
 
